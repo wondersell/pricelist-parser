@@ -70,21 +70,16 @@ class Extruder(object):
         extracted = []
         ws = worksheet_info['worksheet']
         for row_idx in range(worksheet_info['headers']['row'] + 1, self.get_rows_num(ws) + 1):
-            sku = price = None
+            extruded = {}
+
             for header_info in worksheet_info['headers']['headers']:
                 col_idx = header_info['column']
-                # name = header_info['name']
                 column_type = header_info['type']
 
-                # @TODO: Здесь нужно сделать нормальное сохранение всех данных в объекты товаров,
-                # но пока обойдемся только SKU и ценами
-                if column_type == 'price':
-                    price = self.get_cell(ws=ws, col=col_idx, row=row_idx)
+                extruded[str(column_type)] = self.get_cell(ws=ws, col=col_idx, row=row_idx)
 
-                if column_type == 'sku':
-                    sku = self.get_cell(ws=ws, col=col_idx, row=row_idx)
+            pricelist_item = PricelistParserItem(**extruded)
 
-            pricelist_item = PricelistParserItem(sku=sku, price=price)
             if pricelist_item.is_valid():
                 extracted.append(pricelist_item)
 

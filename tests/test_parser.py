@@ -67,3 +67,12 @@ def test_parse_pricelist_function(current_path):
     items = parse_pricelist(current_path + '/samples/sample.xls')
 
     assert len(items) == 679
+
+
+def test_passing_all_extruded_values(current_path):
+    items = parse_pricelist(current_path + '/samples/sample.xls')
+
+    assert items[0].sku == '123-ААА'
+    assert items[0].description == 'Сепулька обычная недеформированная'
+    assert items[0].dimensions == '134x34'
+    assert items[0].price == 3999.99
