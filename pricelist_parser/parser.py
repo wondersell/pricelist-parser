@@ -7,15 +7,15 @@ class PricelistParser(object):
     def __init__(self):
         self.data_sources = {}
 
-    def add_data_source(self, source_file, slug=None, worksheet=None):
+    def add_data_source(self, source_file, slug=None, worksheet=None, **kwargs):
         file_type = self.detect_file_type(path=source_file)
 
         if file_type == 'xls':
-            extruder = XlsExtruder(source_file)
+            extruder = XlsExtruder(source_file, **kwargs)
         elif file_type == 'xlsx':
-            extruder = XlsxExtruder(source_file)
+            extruder = XlsxExtruder(source_file, **kwargs)
         elif file_type == 'csv':
-            extruder = CsvExtruder(source_file)
+            extruder = CsvExtruder(source_file, **kwargs)
         else:
             raise ValueError(f'Unsupported file type {file_type}. Please use one of xls, xlsx or csv instead')
 
@@ -40,8 +40,8 @@ class PricelistParser(object):
         return splitext(basename(path))[0]
 
 
-def parse_pricelist(pricelist_file):
+def parse_pricelist(pricelist_file, **kwargs):
     parser = PricelistParser()
-    parser.add_data_source(source_file=pricelist_file, slug='default')
+    parser.add_data_source(source_file=pricelist_file, slug='default', **kwargs)
 
     return parser.data_sources['default'].items

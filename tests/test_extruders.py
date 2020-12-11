@@ -2,7 +2,7 @@ import openpyxl
 import pytest
 import xlrd
 
-from pricelist_parser import CsvExtruder, Extruder, XlsExtruder, XlsxExtruder
+from pricelist_parser import CsvExtruder, Extruder, XlsExtruder, XlsxExtruder, parse_pricelist
 
 
 def flatten_headers(headers):
@@ -295,3 +295,27 @@ def test_csv_get_cell(sample_csv_ws):
     assert extruder.get_cell(ws, 2, 1) == 'Описание'
     assert extruder.get_cell(ws, 3, 1) == 'Просто заголовок'
     assert extruder.get_cell(ws, 4, 1) == 'Размеры'
+
+
+def test_wrong_encoding_exception_in_csv(current_path):
+    extruder = CsvExtruder()
+
+    try:
+        extruder.load_file(current_path + '/samples/cp154_encoded.csv')
+
+        raise AssertionError()
+    except UnicodeDecodeError:
+        assert True
+
+
+def test_set_encoding_in_csv_load_file(current_path):
+    extruder = CsvExtruder()
+    extruder.load_file(current_path + '/samples/cp154_encoded.csv', encoding='cp154')
+
+    assert True
+
+
+def test_set_encoding_in_parse_pricelist_function(current_path):
+    parse_pricelist(current_path + '/samples/cp154_encoded.csv', encoding='cp154')
+
+    assert True

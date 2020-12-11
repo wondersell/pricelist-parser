@@ -13,7 +13,7 @@ class Extruder(object):
     header_signatures = {
         'sku': ['код', 'артикул', 'модель', 'штрих-код'],
         'price': ['цена', 'ррц', 'стоимость', 'розница', 'рознич', 'оптовая'],
-        'quantity': ['количество', 'кол-во'],
+        'quantity': ['количество', 'кол-во', 'кол'],
         'name': ['название', 'наименование', 'товар', 'номенклатура', 'продукци'],
         'description': ['описание', 'характеристики'],
         'dimensions': ['размер', 'габариты'],
@@ -23,21 +23,21 @@ class Extruder(object):
         'order': ['заказ', 'заявк', '№'],
     }
 
-    def __init__(self, source_file=None):
+    def __init__(self, source_file=None, **kwargs):
         self.items = []
         self.loaded_file = None
 
         if source_file is not None:
-            self.load_data(source_file=source_file)
+            self.load_data(source_file=source_file, **kwargs)
 
-    def load_data(self, source_file):
-        wb = self.load_file(source_file)
+    def load_data(self, source_file, **kwargs):
+        wb = self.load_file(source_file, **kwargs)
 
         # Загружаем данные о полях
         sheets_with_headers = self.get_headers_map(wb)
 
         if len(sheets_with_headers) == 0:
-            raise ValueError('No worksheets with detactable data found')
+            raise ValueError('No worksheets with detectable data found')
 
         # Проходимся по всем листам с данными и загружаем из них товары
         for sheet_info in sheets_with_headers:
@@ -156,7 +156,7 @@ class Extruder(object):
         return None
 
     @abstractmethod
-    def load_file(self, filename):
+    def load_file(self, filename, **kwargs):
         pass
 
     @abstractmethod
@@ -181,7 +181,7 @@ class Extruder(object):
 
 
 class XlsxExtruder(Extruder):
-    def load_file(self, filename):
+    def load_file(self, filename, **kwargs):
         self.loaded_file = load_workbook(filename=filename)
         return self.loaded_file
 
@@ -202,7 +202,7 @@ class XlsxExtruder(Extruder):
 
 
 class XlsExtruder(Extruder):
-    def load_file(self, filename):
+    def load_file(self, filename, **kwargs):
         self.loaded_file = xlrd.open_workbook(filename)
         return self.loaded_file
 
@@ -223,12 +223,14 @@ class XlsExtruder(Extruder):
 
 
 class CsvExtruder(Extruder):
-    def __init__(self, source_file=None):
+    def __init__(self, source_file=None, **kwargs):
         self.data = []
-        super().__init__(source_file)
+        super().__init__(source_file, **kwargs)
 
-    def load_file(self, filename):
-        with open(filename, 'r') as file_object:
+    def load_file(self, filename, **kwargs):
+        encoding = kwargs['encoding'] if 'encoding' in kwargs else 'utf-8'
+
+        with open(filename, 'r', encoding=encoding) as file_object:
             reader = csv.reader(file_object)
             for row in reader:
                 self.data.append(row)
