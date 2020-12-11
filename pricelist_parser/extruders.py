@@ -1,37 +1,42 @@
 import csv
-from abc import abstractmethod
-
 import xlrd
+from abc import abstractmethod
 from openpyxl import load_workbook
 
 from .pricelist_item import PricelistParserItem
+
+header_signatures = {
+    'sku': ['код', 'артикул', 'модель', 'штрих-код'],
+    'price': ['цена', 'ррц', 'стоимость', 'розница', 'рознич', 'оптовая'],
+    'quantity': ['количество', 'кол-во', 'кол'],
+    'name': ['название', 'наименование', 'товар', 'номенклатура', 'продукци'],
+    'description': ['описание', 'характеристики'],
+    'dimensions': ['размер', 'габариты'],
+    'weight': ['вес'],
+    'link': ['ссылка'],
+    'vat': ['ндс'],
+    'order': ['заказ', 'заявк', '№'],
+}
 
 
 class Extruder(object):
     required_headers = ['sku', 'price']
 
-    header_signatures = {
-        'sku': ['код', 'артикул', 'модель', 'штрих-код'],
-        'price': ['цена', 'ррц', 'стоимость', 'розница', 'рознич', 'оптовая'],
-        'quantity': ['количество', 'кол-во', 'кол'],
-        'name': ['название', 'наименование', 'товар', 'номенклатура', 'продукци'],
-        'description': ['описание', 'характеристики'],
-        'dimensions': ['размер', 'габариты'],
-        'weight': ['вес'],
-        'link': ['ссылка'],
-        'vat': ['ндс'],
-        'order': ['заказ', 'заявк', '№'],
-    }
-
     def __init__(self, source_file=None, **kwargs):
         self.items = []
         self.loaded_file = None
+        self.header_signatures = header_signatures.copy()
+        self.source_file = source_file
 
-        if source_file is not None:
-            self.load_data(source_file=source_file, **kwargs)
+    def update_header_signatures(self, signatures, replace=False):
+        for key, signature in signatures.items():
+            if key in self.header_signatures.keys() and not replace:
+                self.header_signatures[key] += signature
+            else:
+                self.header_signatures[key] = signature
 
-    def load_data(self, source_file, **kwargs):
-        wb = self.load_file(source_file, **kwargs)
+    def load_data(self, **kwargs):
+        wb = self.load_file(self.source_file, **kwargs)
 
         # Загружаем данные о полях
         sheets_with_headers = self.get_headers_map(wb)

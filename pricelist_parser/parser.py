@@ -7,7 +7,7 @@ class PricelistParser(object):
     def __init__(self):
         self.data_sources = {}
 
-    def add_data_source(self, source_file, slug=None, worksheet=None, **kwargs):
+    def add_data_source(self, source_file, slug=None, header_signatures=None, replace_header_signatures=False, **kwargs):
         file_type = self.detect_file_type(path=source_file)
 
         if file_type == 'xls':
@@ -22,7 +22,10 @@ class PricelistParser(object):
         if slug is None:
             slug = self.get_slug_from_path(path=source_file)
 
-        self.data_sources[slug] = extruder
+        if header_signatures is not None:
+            extruder.update_header_signatures(signatures=header_signatures, replace=replace_header_signatures)
+
+        self.data_sources[slug] = extruder.load_data(**kwargs)
 
         return self.data_sources[slug]
 

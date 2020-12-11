@@ -1,8 +1,7 @@
 import os
-
 import pytest
 
-from pricelist_parser import CsvExtruder, XlsExtruder, XlsxExtruder
+from pricelist_parser import CsvExtruder, Extruder, PricelistParser, XlsExtruder, XlsxExtruder
 
 
 @pytest.fixture()
@@ -125,3 +124,13 @@ def sample_csv_ws(current_path):
         return extruder.get_worksheet(wb)
 
     return _sample_csv_ws
+
+
+@pytest.fixture()
+def parser():
+    return PricelistParser()
+
+
+@pytest.fixture()
+def extruder():
+    return Extruder()

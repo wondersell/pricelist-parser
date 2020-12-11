@@ -87,6 +87,7 @@ def test_detect_headers_filled_xlsx(current_path):
 
 def test_headers_map_filled_xlsx(current_path):
     extruder = XlsxExtruder(current_path + '/samples/sample.xlsx')
+    extruder.load_data()
 
     headers_map = extruder.get_headers_map(extruder.loaded_file)
 
@@ -98,6 +99,7 @@ def test_headers_map_filled_xlsx(current_path):
 
 def test_headers_map_filled_xls(current_path):
     extruder = XlsExtruder(current_path + '/samples/sample.xls')
+    extruder.load_data()
 
     headers_map = extruder.get_headers_map(extruder.loaded_file)
 
@@ -109,6 +111,7 @@ def test_headers_map_filled_xls(current_path):
 
 def test_extract_data_from_sheet_xlsx(current_path):
     extruder = XlsxExtruder(current_path + '/samples/sample.xlsx')
+    extruder.load_data()
 
     headers_map = extruder.get_headers_map(extruder.loaded_file)
     items = extruder.extract_data_from_sheet(headers_map[0])
@@ -123,6 +126,7 @@ def test_extract_data_from_sheet_xlsx(current_path):
 
 def test_extract_data_from_sheet_xls(current_path):
     extruder = XlsExtruder(current_path + '/samples/sample.xls')
+    extruder.load_data()
 
     headers_map = extruder.get_headers_map(extruder.loaded_file)
     items = extruder.extract_data_from_sheet(headers_map[0])
@@ -319,3 +323,47 @@ def test_set_encoding_in_parse_pricelist_function(current_path):
     parse_pricelist(current_path + '/samples/cp154_encoded.csv', encoding='cp154')
 
     assert True
+
+
+def test_default_header_signature_list(extruder):
+    assert set(extruder.header_signatures.keys()) == {'sku', 'price', 'quantity', 'name', 'description', 'dimensions', 'weight', 'link', 'vat', 'order'}
+
+
+def test_update_header_signature(extruder):
+    extruder.update_header_signatures({'sku': ['товар', 'подношение', 'оброк']})
+
+    assert 'товар' in extruder.header_signatures['sku']
+    assert 'подношение' in extruder.header_signatures['sku']
+    assert 'оброк' in extruder.header_signatures['sku']
+    assert 'артикул' in extruder.header_signatures['sku']
+
+
+def test_replace_header_signature(extruder):
+    extruder.update_header_signatures({'sku': ['товар', 'подношение', 'оброк']}, replace=True)
+
+    assert 'товар' in extruder.header_signatures['sku']
+    assert 'подношение' in extruder.header_signatures['sku']
+    assert 'оброк' in extruder.header_signatures['sku']
+    assert 'артикул' not in extruder.header_signatures['sku']
+
+
+def test_insert_header_signature(extruder):
+    extruder.update_header_signatures({'flavour': ['lepton', 'baryon', 'strangeness', 'charm', 'bottom', 'topness']})
+
+    assert 'flavour' in extruder.header_signatures.keys()
+    assert set(extruder.header_signatures['flavour']) == {'lepton', 'baryon', 'strangeness', 'charm', 'bottom', 'topness'}
+
+    assert 'sku' in extruder.header_signatures.keys()
+    assert 'price' in extruder.header_signatures.keys()
+    assert 'quantity' in extruder.header_signatures.keys()
+    assert 'name' in extruder.header_signatures.keys()
+
+
+def test_header_signatures_not_propagated():
+    extruder_1 = Extruder()
+    extruder_1.update_header_signatures({'flavour': ['lepton', 'baryon', 'strangeness', 'charm', 'bottom', 'topness']})
+
+    extruder_2 = Extruder()
+
+    assert 'flavour' in extruder_1.header_signatures.keys()
+    assert 'flavour' not in extruder_2.header_signatures.keys()
