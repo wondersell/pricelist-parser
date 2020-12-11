@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setuptools.setup(
     name='pricelist-parser',
-    version='0.0.1',
+    version='0.2',
     author='Artem Kiselev',
     author_email='artem.kiselev@gmail.com',
     description='Pricelist parser',
